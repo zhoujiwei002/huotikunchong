@@ -1,5 +1,5 @@
 import { View, Text, Image, ScrollView, Button, Input, Picker } from '@tarojs/components'
-import Taro, { useLoad, chooseImage, compressImage } from '@tarojs/taro'
+import Taro, { useLoad, chooseImage } from '@tarojs/taro'
 import { useState, useEffect } from 'react'
 import { Plus, X, Camera, User, Search, RefreshCw } from 'lucide-react-taro'
 import {
@@ -10,7 +10,8 @@ import {
   deleteInventory,
   uploadFile,
   getInsectByName,
-  getInventoryStats
+  getInventoryStats,
+  createInventory
 } from '@/services/supabase'
 import { getUserNickname, setUserNickname } from '@/utils/user'
 import './index.css'
@@ -129,13 +130,19 @@ const IndexPage = () => {
       })
 
       if (res.tempFilePaths && res.tempFilePaths.length > 0) {
-        // 压缩图片
-        const compressRes = await compressImage({
-          src: res.tempFilePaths[0],
-          quality: 75,
-        })
-
-        setSelectedImage(compressRes.tempFilePath)
+        // H5 端不支持 compressImage，直接使用原始图片
+        const isWeapp = Taro.getEnv() === Taro.ENV_TYPE.WEAPP
+        if (isWeapp) {
+          // 小程序端：压缩图片
+          const compressRes = await compressImage({
+            src: res.tempFilePaths[0],
+            quality: 75,
+          })
+          setSelectedImage(compressRes.tempFilePath)
+        } else {
+          // H5 端：直接使用原始图片
+          setSelectedImage(res.tempFilePaths[0])
+        }
       }
     } catch (error) {
       console.error('[IndexPage] 选择图片失败:', error)
@@ -156,12 +163,19 @@ const IndexPage = () => {
       })
 
       if (res.tempFilePaths && res.tempFilePaths.length > 0) {
-        const compressRes = await compressImage({
-          src: res.tempFilePaths[0],
-          quality: 75,
-        })
-
-        setSelectedOperationImage(compressRes.tempFilePath)
+        // H5 端不支持 compressImage，直接使用原始图片
+        const isWeapp = Taro.getEnv() === Taro.ENV_TYPE.WEAPP
+        if (isWeapp) {
+          // 小程序端：压缩图片
+          const compressRes = await compressImage({
+            src: res.tempFilePaths[0],
+            quality: 75,
+          })
+          setSelectedOperationImage(compressRes.tempFilePath)
+        } else {
+          // H5 端：直接使用原始图片
+          setSelectedOperationImage(res.tempFilePaths[0])
+        }
       }
     } catch (error) {
       console.error('[IndexPage] 选择操作图片失败:', error)
@@ -177,13 +191,22 @@ const IndexPage = () => {
     if (!selectedImage) return null
 
     try {
-      // 读取文件
-      await Taro.getFileInfo({ filePath: selectedImage })
-      const fileData = await Taro.getFileSystemManager().readFile({
-        filePath: selectedImage,
-      })
+      const isWeapp = Taro.getEnv() === Taro.ENV_TYPE.WEAPP
 
-      return await uploadFile(selectedImage, fileData.data as ArrayBuffer, 'image/jpeg')
+      if (isWeapp) {
+        // 小程序端：读取文件并上传
+        await Taro.getFileInfo({ filePath: selectedImage })
+        const fileData = await Taro.getFileSystemManager().readFile({
+          filePath: selectedImage,
+        })
+        return await uploadFile(selectedImage, fileData.data as ArrayBuffer, 'image/jpeg')
+      } else {
+        // H5 端：使用 FileReader 读取文件
+        const response = await fetch(selectedImage)
+        const blob = await response.blob()
+        const arrayBuffer = await blob.arrayBuffer()
+        return await uploadFile(selectedImage, arrayBuffer, blob.type || 'image/jpeg')
+      }
     } catch (error) {
       console.error('[IndexPage] 上传图片失败:', error)
       Taro.showToast({
@@ -199,12 +222,22 @@ const IndexPage = () => {
     if (!selectedOperationImage) return null
 
     try {
-      await Taro.getFileInfo({ filePath: selectedOperationImage })
-      const fileData = await Taro.getFileSystemManager().readFile({
-        filePath: selectedOperationImage,
-      })
+      const isWeapp = Taro.getEnv() === Taro.ENV_TYPE.WEAPP
 
-      return await uploadFile(selectedOperationImage, fileData.data as ArrayBuffer, 'image/jpeg')
+      if (isWeapp) {
+        // 小程序端：读取文件并上传
+        await Taro.getFileInfo({ filePath: selectedOperationImage })
+        const fileData = await Taro.getFileSystemManager().readFile({
+          filePath: selectedOperationImage,
+        })
+        return await uploadFile(selectedOperationImage, fileData.data as ArrayBuffer, 'image/jpeg')
+      } else {
+        // H5 端：使用 FileReader 读取文件
+        const response = await fetch(selectedOperationImage)
+        const blob = await response.blob()
+        const arrayBuffer = await blob.arrayBuffer()
+        return await uploadFile(selectedOperationImage, arrayBuffer, blob.type || 'image/jpeg')
+      }
     } catch (error) {
       console.error('[IndexPage] 上传操作图片失败:', error)
       Taro.showToast({
@@ -256,7 +289,14 @@ const IndexPage = () => {
       // 获取新创建的昆虫 ID
       const newInsect = await getInsectByName(insectForm.name)
       if (newInsect) {
-        // 创建库存记录
+        // 先创建库存记录
+        await createInventory({
+          insect_id: newInsect.id,
+          quantity: parseInt(insectForm.quantity),
+          location: insectForm.location,
+        })
+
+        // 再创建操作日志
         await createOperationLog({
           insect_id: newInsect.id,
           operation_type: '进货',

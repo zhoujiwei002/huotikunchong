@@ -205,6 +205,30 @@ export const getAllInventory = async (location?: string): Promise<InventoryWithI
 }
 
 /**
+ * 创建库存记录
+ */
+export const createInventory = async (inventory: {
+  insect_id: string
+  quantity: number
+  location: string
+}): Promise<Inventory> => {
+  try {
+    const client = getSupabaseClient()
+    const { data, error } = await client
+      .from('inventory')
+      .insert(inventory)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  } catch (error) {
+    console.error('[Supabase] 创建库存记录失败:', error)
+    throw new Error('创建库存记录失败')
+  }
+}
+
+/**
  * 更新库存数量
  */
 export const updateInventory = async (
