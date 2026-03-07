@@ -64,7 +64,7 @@ export const initSupabase = () => {
   const supabaseAnonKey = SUPABASE_ANON_KEY || ''
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    console.error('[Supabase] Supabase 配置缺失，请在 .env 文件中配置 VITE_SUPABASE_URL 和 VITE_SUPABASE_ANON_KEY')
+    console.error('[Supabase] Supabase 配置缺失')
     return false
   }
 

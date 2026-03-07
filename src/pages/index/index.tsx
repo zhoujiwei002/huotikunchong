@@ -1,8 +1,19 @@
 import { View, Text, Image, ScrollView, Button, Input, Picker } from '@tarojs/components'
-import Taro, { useLoad, chooseImage, compressImage } from '@tarojs/taro'
+import Taro, { useLoad, chooseImage, compressImage, showModal } from '@tarojs/taro'
 import { useState, useEffect } from 'react'
-import { Plus, ShoppingCart, X, Activity, Camera, User } from 'lucide-react-taro'
-import { initSupabase, getAllInventory, getAllInsects, createInsect, createOperationLog, deleteInventory, uploadFile, getInsectByName, getInventoryStats } from '@/services/supabase'
+import { Plus, ShoppingCart, X, Activity, Camera, User, Search, RefreshCw } from 'lucide-react-taro'
+import {
+  initSupabase,
+  getAllInventory,
+  getAllInsects,
+  createInsect,
+  createOperationLog,
+  deleteInventory,
+  uploadFile,
+  getInsectByName,
+  getInventoryStats,
+  getAllOperationLogs
+} from '@/services/supabase'
 import { getUserNickname, setUserNickname } from '@/utils/user'
 import './index.css'
 
@@ -20,12 +31,23 @@ const LOCATIONS = [
   '刘君团队',
 ]
 
+// 预设昆虫品种
+const PRESET_INSECTS = [
+  '天门螳螂',
+  '天门甲虫',
+  '晋中甲虫',
+  '绥化甲虫',
+  '本溪甲虫',
+  '天门睫角',
+]
+
 const IndexPage = () => {
   const [inventory, setInventory] = useState<any[]>([])
   const [selectedLocation, setSelectedLocation] = useState('全部')
   const [modalType, setModalType] = useState<'none' | 'add' | 'operation'>('none')
   const [selectedInsect, setSelectedInsect] = useState<any>(null)
   const [loading, setLoading] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
   const [insectForm, setInsectForm] = useState({
     name: '',
     species: '',
@@ -44,6 +66,9 @@ const IndexPage = () => {
   const [selectedImage, setSelectedImage] = useState('')
   const [selectedOperationImage, setSelectedOperationImage] = useState('')
   const [stats, setStats] = useState({ totalQuantity: 0, insectCount: 0 })
+  const [searchKeyword, setSearchKeyword] = useState('')
+  const [showUserModal, setShowUserModal] = useState(false)
+  const [userNickname, setUserNicknameState] = useState('')
 
   // 初始化
   useLoad(async () => {
@@ -51,12 +76,18 @@ const IndexPage = () => {
     initSupabase()
     await loadInventory()
     await loadStats()
+    setUserNicknameState(getUserNickname())
   })
+
+  // 切换位置时重新加载
+  useEffect(() => {
+    loadInventory()
+  }, [selectedLocation])
 
   // 加载库存数据
   const loadInventory = async () => {
     try {
-      console.log('[IndexPage] 开始加载库存数据')
+      console.log('[IndexPage] 开始加载库存数据，位置:', selectedLocation)
       const data = await getAllInventory(selectedLocation !== '全部' ? selectedLocation : undefined)
       console.log('[IndexPage] 库存数据加载成功，数量:', data.length)
       setInventory(data)
@@ -77,6 +108,17 @@ const IndexPage = () => {
     } catch (error) {
       console.error('[IndexPage] 加载统计失败:', error)
     }
+  }
+
+  // 刷新数据
+  const handleRefresh = async () => {
+    setRefreshing(true)
+    await Promise.all([loadInventory(), loadStats()])
+    setRefreshing(false)
+    Taro.showToast({
+      title: '刷新成功',
+      icon: 'success',
+    })
   }
 
   // 选择图片
@@ -137,6 +179,7 @@ const IndexPage = () => {
     if (!selectedImage) return null
 
     try {
+      // 读取文件
       const res = await Taro.getFileInfo({ filePath: selectedImage })
       const fileData = await Taro.getFileSystemManager().readFile({
         filePath: selectedImage,
@@ -188,18 +231,22 @@ const IndexPage = () => {
       setLoading(true)
       console.log('[IndexPage] 开始添加昆虫:', insectForm)
 
+      // 先上传图片
       const imageUrl = await handleUploadImage()
       console.log('[IndexPage] 图片上传结果:', imageUrl)
 
+      // 检查昆虫是否已存在
       const existingInsect = await getInsectByName(insectForm.name)
       if (existingInsect) {
         Taro.showToast({
           title: '该昆虫品种已存在',
           icon: 'none',
         })
+        setLoading(false)
         return
       }
 
+      // 创建昆虫
       await createInsect({
         name: insectForm.name,
         species: insectForm.species || null,
@@ -208,8 +255,10 @@ const IndexPage = () => {
         image_url: imageUrl || null,
       })
 
+      // 获取新创建的昆虫 ID
       const newInsect = await getInsectByName(insectForm.name)
       if (newInsect) {
+        // 创建库存记录
         await createOperationLog({
           insect_id: newInsect.id,
           operation_type: '进货',
@@ -243,7 +292,7 @@ const IndexPage = () => {
     }
   }
 
-  // 执行操作
+  // 执行操作（销售/死亡）
   const handleOperation = async () => {
     if (!selectedInsect || !operationForm.quantity) {
       Taro.showToast({
@@ -255,6 +304,7 @@ const IndexPage = () => {
 
     const quantity = parseInt(operationForm.quantity)
 
+    // 销售时强制要求填写实收价格
     if (operationForm.operationType === '销售' && !operationForm.price) {
       Taro.showToast({
         title: '请填写实收价格',
@@ -263,6 +313,7 @@ const IndexPage = () => {
       return
     }
 
+    // 销售和死亡时检查库存
     if ((operationForm.operationType === '销售' || operationForm.operationType === '死亡') && quantity > selectedInsect.quantity) {
       Taro.showToast({
         title: '库存不足',
@@ -271,16 +322,29 @@ const IndexPage = () => {
       return
     }
 
+    // 销售和死亡时强制要求上传实景图片
+    if ((operationForm.operationType === '销售' || operationForm.operationType === '死亡') && !selectedOperationImage) {
+      Taro.showToast({
+        title: '请拍摄实景图片',
+        icon: 'none',
+      })
+      return
+    }
+
     try {
+      // 上传操作图片
       const operationImageUrl = (operationForm.operationType === '销售' || operationForm.operationType === '死亡')
         ? await handleUploadOperationImage()
         : null
+
+      // 自动跳转到昆虫所属门店
+      const location = selectedInsect.location
 
       await createOperationLog({
         insect_id: selectedInsect.insect_id,
         operation_type: operationForm.operationType as '销售' | '死亡' | '进货',
         quantity,
-        location: selectedInsect.location,
+        location,
         price: operationForm.operationType === '销售' ? parseInt(operationForm.price) : null,
         remark: operationForm.remark || null,
         image_url: operationImageUrl || null,
@@ -344,9 +408,42 @@ const IndexPage = () => {
 
   // 切换位置
   const handleLocationChange = (e: any) => {
-    setSelectedLocation(LOCATIONS[e.detail.value])
-    loadInventory()
+    const newIndex = e.detail.value
+    setSelectedLocation(LOCATIONS[newIndex])
   }
+
+  // 处理昆虫名称选择（从预设列表中选择）
+  const handleInsectNameChange = (e: any) => {
+    const name = PRESET_INSECTS[e.detail.value]
+    setInsectForm({ ...insectForm, name })
+  }
+
+  // 更新用户昵称
+  const handleUpdateNickname = () => {
+    if (!userNickname.trim()) {
+      Taro.showToast({
+        title: '请输入昵称',
+        icon: 'none',
+      })
+      return
+    }
+    setUserNickname(userNickname.trim())
+    setShowUserModal(false)
+    Taro.showToast({
+      title: '昵称更新成功',
+      icon: 'success',
+    })
+  }
+
+  // 过滤库存列表
+  const filteredInventory = inventory.filter(item => {
+    if (!searchKeyword) return true
+    const keyword = searchKeyword.toLowerCase()
+    return (
+      item.insects.name.toLowerCase().includes(keyword) ||
+      item.insects.species?.toLowerCase().includes(keyword)
+    )
+  })
 
   return (
     <View className="w-full h-full flex flex-col bg-gray-50">
@@ -354,13 +451,28 @@ const IndexPage = () => {
       <View className="bg-white p-4 shadow-sm">
         <View className="flex justify-between items-center mb-3">
           <Text className="text-xl font-bold text-gray-800">库存管理</Text>
-          <View className="flex gap-2">
-            <View className="px-3 py-1 bg-blue-100 rounded-full">
-              <Text className="text-sm text-blue-600">{stats.insectCount} 个品种</Text>
+          <View className="flex gap-2 items-center">
+            <View
+              className="flex items-center gap-1 px-3 py-1 bg-blue-100 rounded-full"
+              onClick={() => setShowUserModal(true)}
+            >
+              <User size={14} color="#3b82f6" />
+              <Text className="text-sm text-blue-600">{getUserNickname()}</Text>
             </View>
-            <View className="px-3 py-1 bg-green-100 rounded-full">
-              <Text className="text-sm text-green-600">{stats.totalQuantity} 只</Text>
+            <View
+              className={`p-2 rounded-full ${refreshing ? 'animate-spin' : ''}`}
+              onClick={handleRefresh}
+            >
+              <RefreshCw size={16} color="#6b7280" />
             </View>
+          </View>
+        </View>
+        <View className="flex gap-2 mb-3">
+          <View className="flex-1 px-3 py-1 bg-blue-100 rounded-full flex items-center justify-center">
+            <Text className="text-sm text-blue-600">{stats.insectCount} 个品种</Text>
+          </View>
+          <View className="flex-1 px-3 py-1 bg-green-100 rounded-full flex items-center justify-center">
+            <Text className="text-sm text-green-600">{stats.totalQuantity} 只</Text>
           </View>
         </View>
         <Picker
@@ -376,10 +488,28 @@ const IndexPage = () => {
         </Picker>
       </View>
 
+      {/* 搜索栏 */}
+      <View className="bg-white px-4 py-2">
+        <View className="flex gap-2 items-center bg-gray-50 rounded-lg px-3 py-2">
+          <Search size={16} color="#9ca3af" />
+          <Input
+            className="flex-1 bg-transparent"
+            placeholder="搜索昆虫名称或物种"
+            value={searchKeyword}
+            onInput={(e) => setSearchKeyword(e.detail.value)}
+          />
+          {searchKeyword && (
+            <View onClick={() => setSearchKeyword('')}>
+              <X size={16} color="#9ca3af" />
+            </View>
+          )}
+        </View>
+      </View>
+
       {/* 库存列表 */}
       <ScrollView className="flex-1" scrollY>
         <View className="p-4 space-y-3">
-          {inventory.map((item) => (
+          {filteredInventory.map((item) => (
             <View key={item.id} className="bg-white rounded-xl p-4 shadow-sm">
               <View className="flex gap-3">
                 {item.insects.image_url && (
@@ -413,6 +543,7 @@ const IndexPage = () => {
                     type="primary"
                     onClick={() => {
                       setSelectedInsect(item)
+                      setOperationForm({ ...operationForm, location: item.location })
                       setModalType('operation')
                     }}
                   >
@@ -433,30 +564,33 @@ const IndexPage = () => {
               </View>
             </View>
           ))}
-          {inventory.length === 0 && (
+          {filteredInventory.length === 0 && (
             <View className="flex flex-col items-center justify-center py-20">
-              <Text className="text-gray-400">暂无库存数据</Text>
+              <Text className="text-gray-400">
+                {searchKeyword ? '没有找到匹配的昆虫' : '暂无库存数据'}
+              </Text>
             </View>
           )}
         </View>
       </ScrollView>
 
       {/* 添加按钮 */}
-      <View className="absolute bottom-20 right-4">
+      <View className="fixed bottom-24 right-4">
         <Button
           type="primary"
           size="normal"
-          className="rounded-full shadow-lg"
+          className="rounded-full shadow-lg flex items-center justify-center"
+          style={{ width: '56px', height: '56px', borderRadius: '50%' }}
           onClick={() => setModalType('add')}
         >
-          <Plus size={20} />
+          <Plus size={24} color="white" />
         </Button>
       </View>
 
       {/* 添加昆虫模态框 */}
       {modalType === 'add' && (
         <View className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <View className="bg-white rounded-2xl p-6 w-11/12 max-w-md">
+          <View className="bg-white rounded-2xl p-6 w-11/12 max-w-md max-h-[90vh] flex flex-col">
             <View className="flex justify-between items-center mb-4">
               <Text className="text-lg font-bold">添加昆虫品种</Text>
               <View onClick={() => setModalType('none')}>
@@ -464,9 +598,9 @@ const IndexPage = () => {
               </View>
             </View>
 
-            <ScrollView className="max-h-96">
+            <ScrollView className="flex-1 space-y-4">
               {/* 图片上传 */}
-              <View className="mb-4">
+              <View>
                 {selectedImage ? (
                   <View className="relative">
                     <Image
@@ -494,6 +628,12 @@ const IndexPage = () => {
 
               {/* 表单 */}
               <View className="space-y-3">
+                <Picker mode="selector" range={PRESET_INSECTS}>
+                  <View className="bg-gray-50 rounded-lg px-4 py-3 flex justify-between items-center">
+                    <Text className="text-gray-500">选择预设昆虫</Text>
+                    <Text className="text-gray-800">从列表选择</Text>
+                  </View>
+                </Picker>
                 <View className="bg-gray-50 rounded-lg px-4 py-3">
                   <Input
                     placeholder="昆虫名称 *"
@@ -524,7 +664,7 @@ const IndexPage = () => {
                   />
                 </View>
                 <Picker mode="selector" range={LOCATIONS.slice(1)} value={LOCATIONS.slice(1).indexOf(insectForm.location)}>
-                  <View className="bg-gray-50 rounded-lg px-4 py-3 flex justify-between">
+                  <View className="bg-gray-50 rounded-lg px-4 py-3 flex justify-between items-center">
                     <Text className="text-gray-500">门店 *</Text>
                     <Text className="text-gray-800">{insectForm.location}</Text>
                   </View>
@@ -540,7 +680,7 @@ const IndexPage = () => {
               </View>
             </ScrollView>
 
-            <View className="flex gap-3 mt-4">
+            <View className="flex gap-3 mt-4 pt-4 border-t">
               <View className="flex-1">
                 <Button
                   type="default"
@@ -566,7 +706,7 @@ const IndexPage = () => {
       {/* 操作模态框 */}
       {modalType === 'operation' && selectedInsect && (
         <View className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <View className="bg-white rounded-2xl p-6 w-11/12 max-w-md">
+          <View className="bg-white rounded-2xl p-6 w-11/12 max-w-md max-h-[90vh] flex flex-col">
             <View className="flex justify-between items-center mb-4">
               <Text className="text-lg font-bold">库存操作</Text>
               <View onClick={() => setModalType('none')}>
@@ -574,15 +714,16 @@ const IndexPage = () => {
               </View>
             </View>
 
-            <ScrollView className="max-h-96">
+            <ScrollView className="flex-1 space-y-4">
               {/* 当前库存信息 */}
-              <View className="bg-blue-50 rounded-lg p-3 mb-4">
+              <View className="bg-blue-50 rounded-lg p-3">
                 <Text className="text-sm text-gray-600">{selectedInsect.insects.name}</Text>
                 <Text className="text-xs text-gray-500">当前库存: {selectedInsect.quantity}</Text>
+                <Text className="text-xs text-gray-500">所在位置: {selectedInsect.location}</Text>
               </View>
 
               {/* 操作类型 */}
-              <View className="mb-4">
+              <View>
                 <Text className="text-sm font-medium text-gray-700 mb-2">操作类型</Text>
                 <View className="flex gap-2">
                   {(['销售', '死亡'] as const).map((type) => (
@@ -603,7 +744,7 @@ const IndexPage = () => {
 
               {/* 操作图片 */}
               {(operationForm.operationType === '销售' || operationForm.operationType === '死亡') && (
-                <View className="mb-4">
+                <View>
                   {selectedOperationImage ? (
                     <View className="relative">
                       <Image
@@ -660,7 +801,7 @@ const IndexPage = () => {
               </View>
             </ScrollView>
 
-            <View className="flex gap-3 mt-4">
+            <View className="flex gap-3 mt-4 pt-4 border-t">
               <View className="flex-1">
                 <Button
                   type="default"
@@ -674,6 +815,34 @@ const IndexPage = () => {
                   type="primary"
                   onClick={handleOperation}
                 >
+                  确定
+                </Button>
+              </View>
+            </View>
+          </View>
+        </View>
+      )}
+
+      {/* 用户昵称模态框 */}
+      {showUserModal && (
+        <View className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <View className="bg-white rounded-2xl p-6 w-11/12 max-w-sm">
+            <Text className="text-lg font-bold mb-4">设置昵称</Text>
+            <View className="bg-gray-50 rounded-lg px-4 py-3 mb-4">
+              <Input
+                placeholder="请输入您的昵称"
+                value={userNickname}
+                onInput={(e) => setUserNicknameState(e.detail.value)}
+              />
+            </View>
+            <View className="flex gap-3">
+              <View className="flex-1">
+                <Button type="default" onClick={() => setShowUserModal(false)}>
+                  取消
+                </Button>
+              </View>
+              <View className="flex-1">
+                <Button type="primary" onClick={handleUpdateNickname}>
                   确定
                 </Button>
               </View>
