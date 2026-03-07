@@ -1,0 +1,1 @@
+.container{padding:12.8rpx}.grid-cols-2{display:grid;grid-template-columns:repeat(2,1fr);grid-gap:9.6rpx;gap:9.6rpx}.space-y-3>view+view,.space-y-3>view+text,.space-y-3>text+view,.space-y-3>text+text{margin-top:9.6rpx}
