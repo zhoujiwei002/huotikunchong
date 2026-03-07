@@ -9,8 +9,8 @@ import { createClient } from '@supabase/supabase-js'
 declare const __VITE_SUPABASE_URL__: string
 declare const __VITE_SUPABASE_ANON_KEY__: string
 
-const SUPABASE_URL = typeof __VITE_SUPABASE_URL__ !== 'undefined' ? __VITE_SUPABASE_URL__ : process.env.VITE_SUPABASE_URL || ''
-const SUPABASE_ANON_KEY = typeof __VITE_SUPABASE_ANON_KEY__ !== 'undefined' ? __VITE_SUPABASE_ANON_KEY__ : process.env.VITE_SUPABASE_ANON_KEY || ''
+const SUPABASE_URL = typeof __VITE_SUPABASE_URL__ !== 'undefined' ? __VITE_SUPABASE_URL__ : ''
+const SUPABASE_ANON_KEY = typeof __VITE_SUPABASE_ANON_KEY__ !== 'undefined' ? __VITE_SUPABASE_ANON_KEY__ : ''
 
 // 数据类型定义
 export interface Insect {

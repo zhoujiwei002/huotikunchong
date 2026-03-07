@@ -1,18 +1,16 @@
 import { View, Text, Image, ScrollView, Button, Input, Picker } from '@tarojs/components'
-import Taro, { useLoad, chooseImage, compressImage, showModal } from '@tarojs/taro'
+import Taro, { useLoad, chooseImage, compressImage } from '@tarojs/taro'
 import { useState, useEffect } from 'react'
-import { Plus, ShoppingCart, X, Activity, Camera, User, Search, RefreshCw } from 'lucide-react-taro'
+import { Plus, X, Camera, User, Search, RefreshCw } from 'lucide-react-taro'
 import {
   initSupabase,
   getAllInventory,
-  getAllInsects,
   createInsect,
   createOperationLog,
   deleteInventory,
   uploadFile,
   getInsectByName,
-  getInventoryStats,
-  getAllOperationLogs
+  getInventoryStats
 } from '@/services/supabase'
 import { getUserNickname, setUserNickname } from '@/utils/user'
 import './index.css'
@@ -180,7 +178,7 @@ const IndexPage = () => {
 
     try {
       // 读取文件
-      const res = await Taro.getFileInfo({ filePath: selectedImage })
+      await Taro.getFileInfo({ filePath: selectedImage })
       const fileData = await Taro.getFileSystemManager().readFile({
         filePath: selectedImage,
       })
@@ -201,7 +199,7 @@ const IndexPage = () => {
     if (!selectedOperationImage) return null
 
     try {
-      const res = await Taro.getFileInfo({ filePath: selectedOperationImage })
+      await Taro.getFileInfo({ filePath: selectedOperationImage })
       const fileData = await Taro.getFileSystemManager().readFile({
         filePath: selectedOperationImage,
       })
@@ -412,12 +410,6 @@ const IndexPage = () => {
     setSelectedLocation(LOCATIONS[newIndex])
   }
 
-  // 处理昆虫名称选择（从预设列表中选择）
-  const handleInsectNameChange = (e: any) => {
-    const name = PRESET_INSECTS[e.detail.value]
-    setInsectForm({ ...insectForm, name })
-  }
-
   // 更新用户昵称
   const handleUpdateNickname = () => {
     if (!userNickname.trim()) {
@@ -512,13 +504,11 @@ const IndexPage = () => {
           {filteredInventory.map((item) => (
             <View key={item.id} className="bg-white rounded-xl p-4 shadow-sm">
               <View className="flex gap-3">
-                {item.insects.image_url && (
-                  <Image
-                    src={item.insects.image_url}
-                    className="w-20 h-20 rounded-lg bg-gray-100"
-                    mode="aspectFill"
-                  />
-                )}
+                <Image
+                  src={item.insects.image_url || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCA4MCA4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iODAiIHJ4PSI4IiBmaWxsPSIjRjNGNEY2Ii8+PHBhdGggZD0iTTQwIDIwQzM1LjU4MTcgMjAgMzIgMjMuNTgxNyAzMiAyOFY1MkMzMiA1Ni40MTgzIDM1LjU4MTcgNjAgNDAgNjBDNDQuNDE4MyA2MCA0OCA1Ni40MTgzIDQ4IDUyVjI4QzQ4IDIzLjU4MTcgNDQuNDE4MyAyMCA0MCAyMFpNNDAgNTZDMzYuNjg2MyA1NiAzNCA1My4zMTM3IDM0IDUwQzM0IDQ2LjY4NjMgMzYuNjg2MyA0NCA0MCA0NEM0My4zMTM3IDQ0IDQ2IDQ2LjY4NjMgNDYgNTBDNDYgNTMuMzEzNyA0My4zMTM3IDU2IDQwIDU2WiIgZmlsbD0iIzlDQTNBNyIvPjwvc3ZnPg=='}
+                  style={{ width: '80px', height: '80px', borderRadius: '8px', backgroundColor: '#f3f4f6' }}
+                  mode="aspectFill"
+                />
                 <View className="flex-1">
                   <View className="flex justify-between items-start">
                     <Text className="text-lg font-semibold text-gray-800">{item.insects.name}</Text>
@@ -602,14 +592,15 @@ const IndexPage = () => {
               {/* 图片上传 */}
               <View>
                 {selectedImage ? (
-                  <View className="relative">
+                  <View className="relative" style={{ width: '100%', height: '192px', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#f3f4f6' }}>
                     <Image
                       src={selectedImage}
-                      className="w-full h-48 rounded-lg"
+                      style={{ width: '100%', height: '100%', borderRadius: '8px' }}
                       mode="aspectFill"
                     />
                     <View
                       className="absolute top-2 right-2 bg-black bg-opacity-50 rounded-full p-2"
+                      style={{ top: '8px', right: '8px', borderRadius: '50%', backgroundColor: 'rgba(0,0,0,0.5)' }}
                       onClick={() => setSelectedImage('')}
                     >
                       <X size={16} color="white" />
@@ -618,6 +609,7 @@ const IndexPage = () => {
                 ) : (
                   <View
                     className="w-full h-48 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center"
+                    style={{ width: '100%', height: '192px', borderRadius: '8px', border: '2px dashed #d1d5db' }}
                     onClick={handleChooseImage}
                   >
                     <Camera size={40} className="text-gray-400" />
@@ -746,14 +738,15 @@ const IndexPage = () => {
               {(operationForm.operationType === '销售' || operationForm.operationType === '死亡') && (
                 <View>
                   {selectedOperationImage ? (
-                    <View className="relative">
+                    <View className="relative" style={{ width: '100%', height: '128px', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#f3f4f6' }}>
                       <Image
                         src={selectedOperationImage}
-                        className="w-full h-32 rounded-lg"
+                        style={{ width: '100%', height: '100%', borderRadius: '8px' }}
                         mode="aspectFill"
                       />
                       <View
                         className="absolute top-2 right-2 bg-black bg-opacity-50 rounded-full p-2"
+                        style={{ top: '8px', right: '8px', borderRadius: '50%', backgroundColor: 'rgba(0,0,0,0.5)' }}
                         onClick={() => setSelectedOperationImage('')}
                       >
                         <X size={16} color="white" />
@@ -762,6 +755,7 @@ const IndexPage = () => {
                   ) : (
                     <View
                       className="w-full h-32 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center"
+                      style={{ width: '100%', height: '128px', borderRadius: '8px', border: '2px dashed #d1d5db' }}
                       onClick={handleChooseOperationImage}
                     >
                       <Camera size={32} className="text-gray-400" />
