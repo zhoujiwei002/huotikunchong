@@ -1,236 +1,211 @@
-# 活体昆虫展会库存管理系统
+# 活体昆虫库存管理小程序 - 项目说明
 
-基于 Taro + Supabase 的活体昆虫库存管理 H5 应用。
+## 📋 项目概述
 
-## 功能特性
+基于 Taro 框架开发的活体昆虫库存管理小程序，支持多位置库存同步、操作记录追踪、数据统计及门店间串货。
 
-### 核心功能
-- ✅ 库存列表查看（支持按位置筛选）
-- ✅ 添加昆虫品种（支持图片上传）
-- ✅ 销售登记（必须填写实收价格和实景图片）
-- ✅ 死亡登记（必须拍摄实景图片）
-- ✅ 删除库存（仅库存为 0 时可删除）
-- ✅ 库存状态实时更新
-- ✅ 操作员昵称管理
-- ✅ 搜索昆虫（支持名称和物种搜索）
+## 🛠️ 技术栈
 
-### 业务规则
-- 📍 **固定仓库位置**：全部、公司总部、王东团队、袁兴彪团队、郭秀华团队、王希强团队、王成兵团队、周纪良团队、秦文胜团队、刘君团队
-- 🐛 **预设昆虫品种**：天门螳螂、天门甲虫、晋中甲虫、绥化甲虫、本溪甲虫、天门睫角
-- 📊 **库存状态**：
-  - 无库存（数量为 0）
-  - 库存正常（数量大于 0）
-- 🔒 **删除限制**：仅库存为 0 时可删除
-- 💰 **销售限制**：必须填写实收价格
-- 📸 **图片要求**：
-  - 销售和死亡操作必须拍摄实景图片
-  - 图片自动压缩为 JPEG 格式，质量 75%
-- 🔄 **自动跳转**：销售和死亡操作自动跳转到昆虫所属门店
+- **前端框架**：Taro 4 + React 18 + Tailwind CSS 4
+- **后端框架**：NestJS 10
+- **数据库**：PostgreSQL (Supabase)
+- **图片处理**：Sharp (自动裁剪为 600x600 JPEG)
+- **图标库**：lucide-react-taro
+- **包管理器**：pnpm
 
-## 技术栈
+## 🚀 快速启动
 
-### 前端
-- **框架**: Taro 4 + React 18
-- **样式**: Tailwind CSS 4
-- **图标**: lucide-react-taro
-- **状态管理**: React Hooks (useState, useEffect)
-
-### 后端
-- **数据库**: Supabase (PostgreSQL)
-- **文件存储**: Supabase Storage
-- **实时更新**: Supabase Realtime (未启用)
-
-### 部署
-- **H5 版本**: GitHub Pages
-- **开发环境**: http://localhost:5000
-- **生产环境**: https://username.github.io/huotikunchong/
-
-## 数据库结构
-
-### insects 表（昆虫品种表）
-```sql
-CREATE TABLE insects (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name TEXT NOT NULL,
-  species TEXT,
-  price INTEGER NOT NULL,
-  description TEXT,
-  image_url TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE
-);
-```
-
-### inventory 表（库存表）
-```sql
-CREATE TABLE inventory (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  insect_id UUID NOT NULL REFERENCES insects(id) ON DELETE CASCADE,
-  location TEXT NOT NULL,
-  quantity INTEGER NOT NULL DEFAULT 0,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE,
-  UNIQUE (insect_id, location)
-);
-```
-
-### operation_logs 表（操作日志表）
-```sql
-CREATE TABLE operation_logs (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  insect_id UUID NOT NULL REFERENCES insects(id) ON DELETE CASCADE,
-  operation_type TEXT NOT NULL CHECK (operation_type IN ('销售', '死亡', '进货')),
-  quantity INTEGER NOT NULL,
-  location TEXT NOT NULL,
-  price INTEGER,
-  remark TEXT,
-  image_url TEXT,
-  operator TEXT NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE
-);
-```
-
-## 环境变量
-
-创建 `.env.local` 文件（开发环境）：
-```env
-VITE_SUPABASE_URL=https://vluyeoauwhjnskzqdlbk.supabase.co
-VITE_SUPABASE_ANON_KEY=sb_publishable_I-rKIajDN71LfhUtyjoBzA_pCxAWmgE
-```
-
-创建 `.env.production` 文件（生产环境）：
-```env
-VITE_SUPABASE_URL=https://vluyeoauwhjnskzqdlbk.supabase.co
-VITE_SUPABASE_ANON_KEY=sb_publishable_I-rKIajDN71LfhUtyjoBzA_pCxAWmgE
-```
-
-## 开发指南
-
-### 安装依赖
+### 启动开发环境
 ```bash
-pnpm install
+cd /workspace/projects
+coze dev
 ```
 
-### 启动开发服务器
+- **前端地址**：http://localhost:5000
+- **后端地址**：http://localhost:3000
+
+### 构建生产版本
 ```bash
-pnpm dev
+pnpm build
 ```
 
-- 前端: http://localhost:5000
-- 后端: http://localhost:3000
-
-### 构建 H5 版本
+### 代码检查
 ```bash
-pnpm build:web
+pnpm lint:build && pnpm tsc
 ```
 
-构建产物在 `dist-web/` 目录。
+## 📍 门店配置（固定）
 
-### 构建微信小程序版本
-```bash
-pnpm build:weapp
+目前系统支持的门店位置（共9个）：
+
+1. 公司总部
+2. 王东团队
+3. 袁兴彪团队
+4. 郭秀华团队
+5. 王希强团队
+6. 王成兵团队
+7. 周纪良团队
+8. 秦文胜团队
+9. 刘君团队
+
+**门店配置位置**：
+- `src/pages/index/index.tsx` - `locationOptions` 数组
+- `src/pages/statistics/index.tsx` - `LOCATIONS` 数组
+
+**添加新门店时需要同时修改这两个文件！**
+
+## 🐛 预设昆虫品种
+
+系统初始化时会自动创建以下昆虫品种：
+
+| 名称 | 物种 | 价格 | 描述 |
+|------|------|------|------|
+| 天门螳螂 | 螳螂 | 50 | 天门地区特产螳螂 |
+| 天门甲虫 | 甲虫 | 80 | 天门地区特产甲虫 |
+| 晋中甲虫 | 甲虫 | 100 | 晋中地区特产甲虫 |
+| 绥化甲虫 | 甲虫 | 120 | 绥化地区特产甲虫 |
+| 本溪甲虫 | 甲虫 | 90 | 本溪地区特产甲虫 |
+| 天门睫角 | 睫角守宫 | 180 | 天门地区特产睫角 |
+
+## ⚙️ 核心功能配置
+
+### 库存阈值
+- **无库存**：数量 = 0
+- **库存正常**：数量 > 0
+- **库存紧张**：已移除此提示
+
+### 图片上传规范
+- **尺寸**：自动裁剪为 600x600 正方形
+- **格式**：JPEG
+- **质量**：75%
+- **存储**：Supabase 对象存储
+
+### 操作员识别
+- **实现方式**：用户昵称存储在 Taro Storage 中
+- **工具文件**：`src/utils/user.ts`
+- **功能**：
+  - `getUserNickname()` - 获取用户昵称
+  - `setUserNickname(nickname)` - 设置用户昵称
+
+### 进货功能
+- **状态**：已从客户端移除
+- **原因**：进货需求已不需要
+
+### 删除昆虫
+- **限制**：仅在库存数量为 0 时可用
+- **后端验证**：会检查所有门店的库存数量
+
+## 📁 项目结构
+
+```
+src/
+├── pages/
+│   ├── index/          # 首页（库存列表、添加昆虫、操作记录）
+│   ├── detail/         # 详情页（昆虫详情、操作历史）
+│   └── statistics/     # 统计页（数据统计、报表导出）
+├── network/            # 网络请求封装
+├── utils/
+│   └── user.ts         # 用户昵称管理
+└── server/             # 后端服务
 ```
 
-构建产物在 `dist/` 目录。
+## 🌐 API 路由
 
-## 部署指南
+所有后端路由自动加上 `/api` 前缀（在 `server/src/main.ts` 中配置）
 
-### 部署到 GitHub Pages
+### 库存相关
+- `GET /api/inventory` - 获取所有库存
+- `GET /api/inventory/:id` - 获取库存详情
+- `POST /api/inventory/insects` - 添加昆虫品种
+- `DELETE /api/inventory/insects/:id` - 删除昆虫品种
 
-1. 构建 H5 版本：
-```bash
-pnpm build:web
-```
+### 操作记录
+- `POST /api/inventory/operations` - 创建操作记录（销售/死亡/进货）
+- `GET /api/inventory/logs` - 获取操作记录
 
-2. 创建 gh-pages 分支并部署：
-```bash
-git checkout -b gh-pages
-cp -r dist-web/* .
-git add .
-git commit -m "Deploy to GitHub Pages"
-git push origin gh-pages
-```
+### 图片上传
+- `POST /api/upload` - 上传图片并处理
 
-3. 在 GitHub 仓库设置中启用 GitHub Pages，选择 gh-pages 分支。
+### 统计数据
+- `GET /api/inventory` - 返回库存数据
+- `GET /api/inventory/logs` - 返回操作记录
 
-4. 访问: https://username.github.io/huotikunchong/
+## 🔧 重要注意事项
 
-## 使用指南
+### 门店配置（CRITICAL）
+- 门店位置是**固定配置**，修改时需要同时更新两个文件
+- 添加新门店时，按照现有格式添加到数组的末尾
 
-### 查看库存
-1. 打开应用
-2. 查看库存列表
-3. 点击下拉框切换不同仓库位置
-4. 使用搜索框搜索特定昆虫
+### 用户昵称功能
+- 首次使用需要点击标题栏的紫色用户图标设置昵称
+- 昵称存储在本地 Storage 中，不会同步到服务器
+- 操作记录会显示操作员昵称
 
-### 添加昆虫
-1. 点击右下角的 "+" 按钮
-2. 填写昆虫信息（名称、单价、初始数量等）
-3. 上传昆虫图片
-4. 选择所属门店
-5. 点击"确定"完成添加
+### 跨端兼容性
+- **H5 端白屏问题**：所有垂直排列的 Text 必须添加 `block` 类名
+- **Input 样式**：必须用 View 包裹，样式放在 View 上
+- **Fixed + Flex**：必须使用 inline style
+- **平台检测**：使用 `const isWeapp = Taro.getEnv() === Taro.ENV_TYPE.WEAPP`
 
-### 销售昆虫
-1. 在库存列表中找到要销售的昆虫
-2. 点击"操作"按钮
-3. 选择操作类型为"销售"
-4. 填写销售数量
-5. 填写实收价格（必填）
-6. 拍摄实景图片（必填）
-7. 点击"确定"完成销售
+### 代码规范
+- 使用 `pnpm` 作为包管理器（禁止使用 npm/yarn）
+- 使用 Tailwind CSS 实现样式
+- 禁止硬编码 localhost 到请求 URL
+- 网络请求使用 `Network.request`（禁止直接使用 Taro.request）
 
-### 死亡登记
-1. 在库存列表中找到要登记的昆虫
-2. 点击"操作"按钮
-3. 选择操作类型为"死亡"
-4. 填写死亡数量
-5. 拍摄实景图片（必填）
-6. 点击"确定"完成登记
+## 📝 最近修改记录
 
-### 删除库存
-1. 在库存列表中找到要删除的昆虫
-2. 确认库存数量为 0
-3. 点击"删除"按钮
-4. 确认删除操作
+### 2025-03-05
+- ✅ 新增门店"刘君团队"
+- ✅ 实现操作员身份识别功能（用户昵称）
+- ✅ 添加昵称设置弹窗
+- ✅ 操作记录显示操作员信息
 
-### 设置昵称
-1. 点击右上角的用户图标
-2. 输入您的昵称
-3. 点击"确定"完成设置
+## 🔄 如果沙箱断开
 
-## 常见问题
+### 恢复步骤
+1. **重新初始化项目**：
+   ```bash
+   cd /workspace/projects
+   coze init ${COZE_WORKSPACE_PATH} --template taro
+   ```
 
-### Q: 为什么销售和死亡操作必须拍摄实景图片？
-A: 为了确保操作的真实性和可追溯性，所有销售和死亡操作都需要拍摄实景图片作为凭证。
+2. **启动开发环境**：
+   ```bash
+   coze dev
+   ```
 
-### Q: 为什么删除库存时库存必须为 0？
-A: 为了防止误删除有库存的记录，只有当库存为 0 时才允许删除。
+3. **检查 Git 状态**：
+   ```bash
+   git status
+   ```
 
-### Q: 为什么销售操作必须填写实收价格？
-A: 为了准确记录销售收入，便于后续财务统计和分析。
+4. **如果需要恢复之前的改动**：
+   ```bash
+   git log  # 查看提交历史
+   git checkout <commit-hash>  # 恢复到指定版本
+   ```
 
-### Q: 如何重置库存数量？
-A: 可以通过"销售"或"死亡"操作减少库存，或添加新昆虫时设置初始数量。
+## 📞 联系信息
 
-### Q: 如何查看操作日志？
-A: 目前操作日志功能正在开发中，未来版本将支持查看详细的操作记录。
+如有问题，请查看：
+- 系统日志：`tail -50 /tmp/coze-logs/dev.log`
+- 前端日志：`tail -50 /app/work/logs/bypass/console.log`
+- 后端日志：查看开发服务器控制台
 
-## 更新日志
+## ✅ 验证清单
 
-### v1.0.0 (2026-03-08)
-- ✅ 初始版本发布
-- ✅ 实现核心库存管理功能
-- ✅ 支持添加、销售、死亡操作
-- ✅ 支持图片上传和压缩
-- ✅ 支持按位置筛选库存
-- ✅ 支持搜索昆虫
-- ✅ 实现操作员昵称管理
+每次修改后请确认：
+- [ ] ESLint 检查通过
+- [ ] TypeScript 类型检查通过
+- [ ] 编译检查通过（H5/WeApp/TT/Server）
+- [ ] 热更新正常
+- [ ] 前端页面正常渲染
+- [ ] 后端接口正常响应
+- [ ] 无新错误引入
 
-## 许可证
+---
 
-MIT License
-
-## 联系方式
-
-如有问题或建议，请联系开发团队。
+**文档生成时间**：2025-03-05
+**当前分支**：main
+**项目状态**：✅ 正常运行

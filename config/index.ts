@@ -94,10 +94,6 @@ export default defineConfig<'vite'>(async (merge, _env) => {
           '',
       ),
       TARO_ENV: JSON.stringify(process.env.TARO_ENV),
-      VITE_SUPABASE_URL: JSON.stringify(process.env.VITE_SUPABASE_URL || ''),
-      VITE_SUPABASE_ANON_KEY: JSON.stringify(process.env.VITE_SUPABASE_ANON_KEY || ''),
-      __VITE_SUPABASE_URL__: JSON.stringify(process.env.VITE_SUPABASE_URL || ''),
-      __VITE_SUPABASE_ANON_KEY__: JSON.stringify(process.env.VITE_SUPABASE_ANON_KEY || ''),
     },
     copy: {
       patterns: [],
@@ -174,7 +170,7 @@ export default defineConfig<'vite'>(async (merge, _env) => {
       },
     },
     h5: {
-      publicPath: '/huotikunchong/',
+      publicPath: '/',
       staticDirectory: 'static',
       devServer: {
         port: 5000,

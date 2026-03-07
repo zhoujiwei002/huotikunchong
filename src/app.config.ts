@@ -1,23 +1,13 @@
-export default typeof definePageConfig === 'function'
-  ? definePageConfig({
-      pages: [
-        'pages/index/index'
-      ],
-      window: {
-        backgroundTextStyle: 'light',
-        navigationBarBackgroundColor: '#fff',
-        navigationBarTitleText: '库存管理',
-        navigationBarTextStyle: 'black'
-      }
-    })
-  : {
-      pages: [
-        'pages/index/index'
-      ],
-      window: {
-        backgroundTextStyle: 'light',
-        navigationBarBackgroundColor: '#fff',
-        navigationBarTitleText: '库存管理',
-        navigationBarTextStyle: 'black'
-      }
-    }
+export default defineAppConfig({
+  pages: [
+    'pages/index/index',
+    'pages/detail/index',
+    'pages/statistics/index'
+  ],
+  window: {
+    backgroundTextStyle: 'light',
+    navigationBarBackgroundColor: '#ffffff',
+    navigationBarTitleText: '活体昆虫库存管理',
+    navigationBarTextStyle: 'black'
+  }
+})
