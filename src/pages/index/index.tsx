@@ -482,14 +482,14 @@ const IndexPage = () => {
       {/* 顶部统计栏 */}
       <View className="bg-white p-4 shadow-sm">
         <View className="flex justify-between items-center mb-3">
-          <Text className="text-xl font-bold text-gray-800">库存管理</Text>
+          <Text className="block text-xl font-bold text-gray-800">库存管理</Text>
           <View className="flex gap-2 items-center">
             <View
               className="flex items-center gap-1 px-3 py-1 bg-blue-100 rounded-full"
               onClick={() => setShowUserModal(true)}
             >
               <User size={14} color="#3b82f6" />
-              <Text className="text-sm text-blue-600">{getUserNickname()}</Text>
+              <Text className="block text-sm text-blue-600">{getUserNickname()}</Text>
             </View>
             <View
               className={`p-2 rounded-full ${refreshing ? 'animate-spin' : ''}`}
@@ -501,10 +501,10 @@ const IndexPage = () => {
         </View>
         <View className="flex gap-2 mb-3">
           <View className="flex-1 px-3 py-1 bg-blue-100 rounded-full flex items-center justify-center">
-            <Text className="text-sm text-blue-600">{stats.insectCount} 个品种</Text>
+            <Text className="block text-sm text-blue-600">{stats.insectCount} 个品种</Text>
           </View>
           <View className="flex-1 px-3 py-1 bg-green-100 rounded-full flex items-center justify-center">
-            <Text className="text-sm text-green-600">{stats.totalQuantity} 只</Text>
+            <Text className="block text-sm text-green-600">{stats.totalQuantity} 只</Text>
           </View>
         </View>
         <Picker
@@ -514,8 +514,8 @@ const IndexPage = () => {
           onChange={handleLocationChange}
         >
           <View className="flex justify-between items-center px-4 py-2 bg-gray-50 rounded-lg">
-            <Text className="text-sm text-gray-600">当前位置</Text>
-            <Text className="text-sm font-medium text-gray-800">{selectedLocation}</Text>
+            <Text className="block text-sm text-gray-600">当前位置</Text>
+            <Text className="block text-sm font-medium text-gray-800">{selectedLocation}</Text>
           </View>
         </Picker>
       </View>
@@ -524,12 +524,14 @@ const IndexPage = () => {
       <View className="bg-white px-4 py-2">
         <View className="flex gap-2 items-center bg-gray-50 rounded-lg px-3 py-2">
           <Search size={16} color="#9ca3af" />
-          <Input
-            className="flex-1 bg-transparent"
-            placeholder="搜索昆虫名称或物种"
-            value={searchKeyword}
-            onInput={(e) => setSearchKeyword(e.detail.value)}
-          />
+          <View className="flex-1">
+            <Input
+              className="w-full bg-transparent"
+              placeholder="搜索昆虫名称或物种"
+              value={searchKeyword}
+              onInput={(e) => setSearchKeyword(e.detail.value)}
+            />
+          </View>
           {searchKeyword && (
             <View onClick={() => setSearchKeyword('')}>
               <X size={16} color="#9ca3af" />
@@ -551,17 +553,17 @@ const IndexPage = () => {
                 />
                 <View className="flex-1">
                   <View className="flex justify-between items-start">
-                    <Text className="text-lg font-semibold text-gray-800">{item.insects.name}</Text>
+                    <Text className="block text-lg font-semibold text-gray-800">{item.insects.name}</Text>
                     <View className={`px-2 py-1 rounded-full ${item.quantity === 0 ? 'bg-red-100' : 'bg-green-100'}`}>
-                      <Text className={`text-xs font-medium ${item.quantity === 0 ? 'text-red-600' : 'text-green-600'}`}>
+                      <Text className={`block text-xs font-medium ${item.quantity === 0 ? 'text-red-600' : 'text-green-600'}`}>
                         {item.quantity === 0 ? '无库存' : '库存正常'}
                       </Text>
                     </View>
                   </View>
-                  <Text className="text-sm text-gray-500 mt-1">
+                  <Text className="block text-sm text-gray-500 mt-1">
                     {item.insects.species || '-'} | ¥{item.insects.price}
                   </Text>
-                  <Text className="text-sm text-gray-500 mt-1">
+                  <Text className="block text-sm text-gray-500 mt-1">
                     {item.location}
                   </Text>
                 </View>
@@ -596,7 +598,7 @@ const IndexPage = () => {
           ))}
           {filteredInventory.length === 0 && (
             <View className="flex flex-col items-center justify-center py-20">
-              <Text className="text-gray-400">
+              <Text className="block text-gray-400">
                 {searchKeyword ? '没有找到匹配的昆虫' : '暂无库存数据'}
               </Text>
             </View>
@@ -622,7 +624,7 @@ const IndexPage = () => {
         <View className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <View className="bg-white rounded-2xl p-6 w-11/12 max-w-md max-h-[90vh] flex flex-col">
             <View className="flex justify-between items-center mb-4">
-              <Text className="text-lg font-bold">添加昆虫品种</Text>
+              <Text className="block text-lg font-bold">添加昆虫品种</Text>
               <View onClick={() => setModalType('none')}>
                 <X size={24} className="text-gray-500" />
               </View>
@@ -653,7 +655,7 @@ const IndexPage = () => {
                     onClick={handleChooseImage}
                   >
                     <Camera size={40} className="text-gray-400" />
-                    <Text className="text-gray-400 mt-2">点击上传图片</Text>
+                    <Text className="block text-gray-400 mt-2">点击上传图片</Text>
                   </View>
                 )}
               </View>
@@ -662,8 +664,8 @@ const IndexPage = () => {
               <View className="space-y-3">
                 <Picker mode="selector" range={PRESET_INSECTS}>
                   <View className="bg-gray-50 rounded-lg px-4 py-3 flex justify-between items-center">
-                    <Text className="text-gray-500">选择预设昆虫</Text>
-                    <Text className="text-gray-800">从列表选择</Text>
+                    <Text className="block text-gray-500">选择预设昆虫</Text>
+                    <Text className="block text-gray-800">从列表选择</Text>
                   </View>
                 </Picker>
                 <View className="bg-gray-50 rounded-lg px-4 py-3">
@@ -697,8 +699,8 @@ const IndexPage = () => {
                 </View>
                 <Picker mode="selector" range={LOCATIONS.slice(1)} value={LOCATIONS.slice(1).indexOf(insectForm.location)}>
                   <View className="bg-gray-50 rounded-lg px-4 py-3 flex justify-between items-center">
-                    <Text className="text-gray-500">门店 *</Text>
-                    <Text className="text-gray-800">{insectForm.location}</Text>
+                    <Text className="block text-gray-500">门店 *</Text>
+                    <Text className="block text-gray-800">{insectForm.location}</Text>
                   </View>
                 </Picker>
                 <View className="bg-gray-50 rounded-lg px-4 py-3">
@@ -740,7 +742,7 @@ const IndexPage = () => {
         <View className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <View className="bg-white rounded-2xl p-6 w-11/12 max-w-md max-h-[90vh] flex flex-col">
             <View className="flex justify-between items-center mb-4">
-              <Text className="text-lg font-bold">库存操作</Text>
+              <Text className="block text-lg font-bold">库存操作</Text>
               <View onClick={() => setModalType('none')}>
                 <X size={24} className="text-gray-500" />
               </View>
@@ -749,14 +751,14 @@ const IndexPage = () => {
             <ScrollView className="flex-1 space-y-4">
               {/* 当前库存信息 */}
               <View className="bg-blue-50 rounded-lg p-3">
-                <Text className="text-sm text-gray-600">{selectedInsect.insects.name}</Text>
-                <Text className="text-xs text-gray-500">当前库存: {selectedInsect.quantity}</Text>
-                <Text className="text-xs text-gray-500">所在位置: {selectedInsect.location}</Text>
+                <Text className="block text-sm text-gray-600">{selectedInsect.insects.name}</Text>
+                <Text className="block text-xs text-gray-500">当前库存: {selectedInsect.quantity}</Text>
+                <Text className="block text-xs text-gray-500">所在位置: {selectedInsect.location}</Text>
               </View>
 
               {/* 操作类型 */}
               <View>
-                <Text className="text-sm font-medium text-gray-700 mb-2">操作类型</Text>
+                <Text className="block text-sm font-medium text-gray-700 mb-2">操作类型</Text>
                 <View className="flex gap-2">
                   {(['销售', '死亡'] as const).map((type) => (
                     <View
@@ -768,7 +770,7 @@ const IndexPage = () => {
                       }`}
                       onClick={() => setOperationForm({ ...operationForm, operationType: type })}
                     >
-                      <Text className="text-sm">{type}</Text>
+                      <Text className="block text-sm">{type}</Text>
                     </View>
                   ))}
                 </View>
@@ -799,7 +801,7 @@ const IndexPage = () => {
                       onClick={handleChooseOperationImage}
                     >
                       <Camera size={32} className="text-gray-400" />
-                      <Text className="text-gray-400 text-sm mt-2">拍摄实景图片</Text>
+                      <Text className="block text-gray-400 text-sm mt-2">拍摄实景图片</Text>
                     </View>
                   )}
                 </View>
@@ -861,7 +863,7 @@ const IndexPage = () => {
       {showUserModal && (
         <View className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <View className="bg-white rounded-2xl p-6 w-11/12 max-w-sm">
-            <Text className="text-lg font-bold mb-4">设置昵称</Text>
+            <Text className="block text-lg font-bold mb-4">设置昵称</Text>
             <View className="bg-gray-50 rounded-lg px-4 py-3 mb-4">
               <Input
                 placeholder="请输入您的昵称"

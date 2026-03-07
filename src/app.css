@@ -26,7 +26,7 @@ taro-view-core {
 }
 
 taro-text-core {
-  display: inline;
+  display: block; /* 强制 Text 为 block 元素，解决 H5 端换行问题 */
 }
 
 taro-input-core {
