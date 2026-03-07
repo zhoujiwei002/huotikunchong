@@ -546,11 +546,19 @@ const IndexPage = () => {
           {filteredInventory.map((item) => (
             <View key={item.id} className="bg-white rounded-xl p-4 shadow-sm">
               <View className="flex gap-3">
-                <Image
-                  src={item.insects.image_url || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCA4MCA4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iODAiIHJ4PSI4IiBmaWxsPSIjRjNGNEY2Ii8+PHBhdGggZD0iTTQwIDIwQzM1LjU4MTcgMjAgMzIgMjMuNTgxNyAzMiAyOFY1MkMzMiA1Ni40MTgzIDM1LjU4MTcgNjAgNDAgNjBDNDQuNDE4MyA2MCA0OCA1Ni40MTgzIDQ4IDUyVjI4QzQ4IDIzLjU4MTcgNDQuNDE4MyAyMCA0MCAyMFpNNDAgNTZDMzYuNjg2MyA1NiAzNCA1My4zMTM3IDM0IDUwQzM0IDQ2LjY4NjMgMzYuNjg2MyA0NCA0MCA0NEM0My4zMTM3IDQ0IDQ2IDQ2LjY4NjMgNDYgNTBDNDYgNTMuMzEzNyA0My4zMTM3IDU2IDQwIDU2WiIgZmlsbD0iIzlDQTNBNyIvPjwvc3ZnPg=='}
-                  style={{ width: '80px', height: '80px', borderRadius: '8px', backgroundColor: '#f3f4f6' }}
-                  mode="aspectFill"
-                />
+                <View className="flex-shrink-0" style={{ width: '80px', height: '80px', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#f3f4f6', border: '1px solid #e5e7eb' }}>
+                  {item.insects.image_url ? (
+                    <Image
+                      src={item.insects.image_url}
+                      className="w-full h-full"
+                      mode="aspectFill"
+                    />
+                  ) : (
+                    <View className="w-full h-full flex items-center justify-center">
+                      <Text className="text-gray-400 text-xs">无图片</Text>
+                    </View>
+                  )}
+                </View>
                 <View className="flex-1">
                   <View className="flex justify-between items-start">
                     <Text className="block text-lg font-semibold text-gray-800">{item.insects.name}</Text>
