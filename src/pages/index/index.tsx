@@ -1,7 +1,7 @@
 import { View, Text, Image, ScrollView, Button, Input, Picker } from '@tarojs/components'
 import Taro, { useLoad, chooseImage } from '@tarojs/taro'
 import { useState, useEffect } from 'react'
-import { Plus, X, Camera, User, Search, RefreshCw } from 'lucide-react-taro'
+import { Plus, X, Camera, User, Search, RefreshCw, Bug, Palette } from 'lucide-react-taro'
 import {
   initSupabase,
   getAllInventory,
@@ -39,6 +39,21 @@ const PRESET_INSECTS = [
   '本溪甲虫',
   '天门睫角',
 ]
+
+// 昆虫品种对应的颜色配置
+const INSECT_COLORS: Record<string, { bg: string; text: string; iconColor: string }> = {
+  '天门螳螂': { bg: 'bg-green-100', text: 'text-green-700', iconColor: '#22c55e' },
+  '天门甲虫': { bg: 'bg-blue-100', text: 'text-blue-700', iconColor: '#3b82f6' },
+  '晋中甲虫': { bg: 'bg-purple-100', text: 'text-purple-700', iconColor: '#a855f7' },
+  '绥化甲虫': { bg: 'bg-orange-100', text: 'text-orange-700', iconColor: '#f97316' },
+  '本溪甲虫': { bg: 'bg-pink-100', text: 'text-pink-700', iconColor: '#ec4899' },
+  '天门睫角': { bg: 'bg-teal-100', text: 'text-teal-700', iconColor: '#14b8a6' },
+}
+
+// 获取昆虫颜色配置
+const getInsectColor = (name: string) => {
+  return INSECT_COLORS[name] || { bg: 'bg-gray-100', text: 'text-gray-700', iconColor: '#6b7280' }
+}
 
 const IndexPage = () => {
   const [inventory, setInventory] = useState<any[]>([])
@@ -543,22 +558,29 @@ const IndexPage = () => {
       {/* 库存列表 */}
       <ScrollView className="flex-1" scrollY>
         <View className="p-4 space-y-3">
-          {filteredInventory.map((item) => (
-            <View key={item.id} className="bg-white rounded-xl p-4 shadow-sm">
-              <View className="flex gap-3">
-                <View className="flex-shrink-0" style={{ width: '80px', height: '80px', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#f3f4f6', border: '1px solid #e5e7eb' }}>
-                  {item.insects.image_url ? (
-                    <Image
-                      src={item.insects.image_url}
-                      className="w-full h-full"
-                      mode="aspectFill"
-                    />
-                  ) : (
-                    <View className="w-full h-full flex items-center justify-center">
-                      <Text className="text-gray-400 text-xs">无图片</Text>
-                    </View>
-                  )}
-                </View>
+          {filteredInventory.map((item) => {
+            const color = getInsectColor(item.insects.name)
+            return (
+              <View key={item.id} className="bg-white rounded-xl p-4 shadow-sm">
+                <View className="flex gap-3">
+                  <View
+                    className={`flex-shrink-0 ${color.bg} flex items-center justify-center`}
+                    style={{ width: '80px', height: '80px', borderRadius: '8px', border: `2px solid ${color.iconColor}20` }}
+                  >
+                    {item.insects.image_url ? (
+                      <Image
+                        src={item.insects.image_url}
+                        className="w-full h-full rounded-lg"
+                        mode="aspectFill"
+                        style={{ borderRadius: '8px' }}
+                      />
+                    ) : (
+                      <View className="flex flex-col items-center justify-center">
+                        <Bug size={32} color={color.iconColor} />
+                        <Text className={`text-xs ${color.text} mt-1`}>无图片</Text>
+                      </View>
+                    )}
+                  </View>
                 <View className="flex-1">
                   <View className="flex justify-between items-start">
                     <Text className="block text-lg font-semibold text-gray-800">{item.insects.name}</Text>
@@ -603,7 +625,8 @@ const IndexPage = () => {
                 )}
               </View>
             </View>
-          ))}
+            )
+          })}
           {filteredInventory.length === 0 && (
             <View className="flex flex-col items-center justify-center py-20">
               <Text className="block text-gray-400">
