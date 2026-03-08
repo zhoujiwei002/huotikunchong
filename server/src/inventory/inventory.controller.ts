@@ -6,6 +6,18 @@ import { InventoryService } from './inventory.service'
 export class InventoryController {
   constructor(private readonly inventoryService: InventoryService) {}
 
+  // ==================== 系统信息 ====================
+
+  @Get('locations')
+  async getLocations() {
+    try {
+      const data = this.inventoryService.getLocations()
+      return { code: 200, msg: 'success', data }
+    } catch (error) {
+      return { code: 500, msg: error.message, data: null }
+    }
+  }
+
   // ==================== 昆虫管理 ====================
 
   @Get('insects')

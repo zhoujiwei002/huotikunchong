@@ -1,43 +1,115 @@
-# 🌐 公网下载链接（最终版本 - 包含 dist 目录）
+# 🌐 活体昆虫库存管理系统 - 完整版
 
-## ✅ 已修复所有问题
+## ✅ 已完成的功能
 
-### 问题 1：缺少 dist 目录
-- ❌ 之前版本排除了 dist 目录
-- ✅ 现已包含完整的 dist 目录
+### 1. 完整的后端 API
+- ✅ 昆虫管理（增删改查）
+- ✅ 库存管理（多门店库存）
+- ✅ 操作记录（进货、销售、死亡、添加）
+- ✅ 串货功能（门店间库存转移）
+- ✅ 图片上传（自动裁剪为 600x600 正方形 JPEG）
+- ✅ 仓库位置管理（预设 9 个位置）
+- ✅ 库存统计和汇总
 
-### 问题 2：AppID 未配置
-- ❌ 之前 dist/project.config.json 中的 appid 是 `touristappid`
-- ✅ 现已更新为 `wx06b72147ad791131`
+### 2. 数据库自动初始化
+- ✅ 自动创建预设的 9 个仓库位置
+- ✅ 自动创建预设的 6 种昆虫品种
+- ✅ 每个昆虫品种自动创建初始库存记录（数量为 0）
+- ✅ 智能检测，避免重复初始化
 
-### 问题 3：小程序构建文件缺失
-- ❌ 之前 dist 目录缺少必要的构建文件
-- ✅ 现已重新构建，包含完整的 app.json、app.js 等文件
+### 3. 完整的前端小程序
+- ✅ 库存列表展示
+- ✅ 搜索和筛选功能
+- ✅ 添加昆虫（支持图片上传）
+- ✅ 销售登记（必填实收价格）
+- ✅ 死亡记录
+- ✅ 统计报表
+- ✅ 跨端兼容（微信小程序 + H5）
+
+### 4. 预设数据
+
+#### 9 个仓库位置
+1. 全部
+2. 公司总部
+3. 王东团队
+4. 袁兴彪团队
+5. 郭秀华团队
+6. 王希强团队
+7. 王成兵团队
+8. 周纪良团队
+9. 秦文胜团队
+10. 刘君团队
+
+#### 6 种昆虫品种
+1. 天门螳螂 - 150元
+2. 天门甲虫 - 120元
+3. 晋中甲虫 - 100元
+4. 绥化甲虫 - 110元
+5. 本溪甲虫 - 130元
+6. 天门睫角 - 200元
 
 ---
 
-## 📥 点击下方链接下载（最终版本）
+## 📥 下载链接（完整版）
 
 ```
-https://coze-coding-project.tos.coze.site/coze_storage_7613471713153613865/projects-backup-v3.tar_700741e0.gz?sign=1775537472-3d8e73daa3-0-a07a52be10386d5c68955debe6ac8a50b46a878009be2c04a43c467b7ffd9209
+https://coze-coding-project.tos.coze.site/coze_storage_7613471713153613865/projects-backup-v4.tar_e6a9fc54.gz?sign=1775537956-4e6dc16d5c-0-bec99f1f8896eaa002e3db0d510739b4359fbea5e8a3d663215abc274de1a980
 ```
+
+**文件大小**：1.7 MB
+**有效期**：30 天
 
 ---
 
 ## 🚀 快速开始
 
 ### 步骤 1：下载并解压
+
 ```bash
 # 下载
-curl -O "https://coze-coding-project.tos.coze.site/coze_storage_7613471713153613865/projects-backup-v3.tar_700741e0.gz?sign=1775537472-3d8e73daa3-0-a07a52be10386d5c68955debe6ac8a50b46a878009be2c04a43c467b7ffd9209" --output projects-backup.tar.gz
+curl -O "https://coze-coding-project.tos.coze.site/coze_storage_7613471713153613865/projects-backup-v4.tar_e6a9fc54.gz?sign=1775537956-4e6dc16d5c-0-bec99f1f8896eaa002e3db0d510739b4359fbea5e8a3d663215abc274de1a980" --output projects-backup.tar.gz
 
 # 解压
 tar -xzf projects-backup.tar.gz
+cd projects
 ```
 
-### 步骤 2：导入微信开发者工具
+### 步骤 2：安装依赖
 
-**注意**：这次不需要安装依赖，dist 目录已经包含所有必要文件！
+```bash
+pnpm install
+```
+
+### 步骤 3：配置环境变量
+
+```bash
+cp .env.production .env
+```
+
+**重要**：如果需要配置后端域名，编辑 `.env` 文件，修改 `PROJECT_DOMAIN`。
+
+### 步骤 4：启动后端服务
+
+```bash
+pnpm dev:server
+```
+
+**后端服务启动后会自动**：
+- ✅ 检查数据库连接
+- ✅ 检测是否已初始化
+- ✅ 自动创建预设的 9 个仓库位置
+- ✅ 自动创建预设的 6 种昆虫品种
+- ✅ 为每个昆虫品种创建初始库存记录（数量为 0）
+
+### 步骤 5：启动前端服务（可选）
+
+如果需要热更新开发，同时启动前端：
+
+```bash
+pnpm dev
+```
+
+### 步骤 6：导入微信开发者工具
 
 1. 打开微信开发者工具
 2. 点击"+"号创建项目
@@ -46,42 +118,54 @@ tar -xzf projects-backup.tar.gz
 5. 开发模式：小程序
 6. 点击"创建"
 
-**✅ 现在可以直接运行了！**
+### 步骤 7：关闭域名校验
 
-### 步骤 3：启动开发服务（可选）
+1. 点击右上角"详情"
+2. 选择"本地设置"
+3. 勾选"不校验合法域名、web-view（业务域名）、TLS 版本以及 HTTPS 证书"
 
-如果需要修改代码并热更新：
+### 步骤 8：开始使用
 
-```bash
-cd projects
-pnpm install
-coze dev
-```
+- ✅ 查看预设的昆虫品种（数据库已自动初始化）
+- ✅ 点击"新增"按钮添加新的昆虫记录
+- ✅ 进行销售、死亡等操作
+- ✅ 查看统计报表
 
 ---
 
 ## 📂 包含内容
 
-### dist/ 目录（可直接导入）
-- ✅ `dist/project.config.json` - 项目配置（AppID 已配置）
-- ✅ `dist/app.json` - 小程序配置
-- ✅ `dist/app.js` - 小程序入口文件
-- ✅ `dist/app.wxss` - 全局样式
-- ✅ `dist/pages/` - 所有页面文件
-- ✅ `dist/taro.js` - Taro 运行时
-- ✅ `dist/vendors.js` - 第三方库
+### dist/ 目录（可直接导入微信开发者工具）
+- ✅ 完整的小程序构建文件
+- ✅ AppID 已配置为 `wx06b72147ad791131`
+- ✅ 所有页面和组件
+- ✅ 所有样式和资源
 
-### 源代码（src/）
+### src/ 目录（源代码）
 - ✅ 完整的前端代码（Taro + React 18）
 - ✅ 完整的后端代码（NestJS 10）
-- ✅ 配置文件（package.json, tsconfig.json）
-- ✅ 环境变量模板（.env.production）
+- ✅ 所有 API 接口实现
+- ✅ 数据库初始化逻辑
+
+### server/ 目录（后端代码）
+- ✅ NestJS 应用
+- ✅ 库存管理模块
+- ✅ 图片上传功能
+- ✅ 数据库初始化服务
+- ✅ Supabase 集成
+
+### 配置文件
+- ✅ package.json
+- ✅ tsconfig.json
+- ✅ vite.config.ts
+- ✅ tailwind.config.js
+- ✅ .env.production（环境变量模板）
 
 ### 文档
+- ✅ README.md（项目说明）
 - ✅ DEV_SETUP.md（开发环境配置指南）
 - ✅ DEPLOYMENT.md（部署指南）
 - ✅ API_DOCUMENTATION.md（API 文档）
-- ✅ README.md（项目说明）
 - ✅ CHANGELOG.md（更新日志）
 
 ### 已排除的文件
@@ -91,71 +175,149 @@ coze dev
 
 ---
 
-## 📋 验证 dist 目录
-
-解压后，请确认 `projects/dist/` 目录包含以下文件：
-
-```bash
-ls -la projects/dist/
-```
-
-应该看到：
-- `app.json` ✓
-- `app.js` ✓
-- `app.wxss` ✓
-- `project.config.json` ✓ （AppID: wx06b72147ad791131）
-- `pages/` 目录 ✓
-
----
-
-## ⚠️ 重要提示
-
-- **链接有效期**：30 天
-- **项目目录**：导入时选择 `projects/dist/` 文件夹
-- **AppID**：`wx06b72147ad791131`
-- **文件大小**：1.7 MB（包含完整的 dist 目录）
-
----
-
 ## 🔧 常见问题
 
-### Q1: 导入后提示找不到 app.json？
+### Q1: 启动后端服务后，如何确认数据库已初始化？
+
+**查看后端日志**，应该看到：
+```
+🚀 开始初始化数据库...
+✅ 数据库已初始化，跳过
+✅ 数据库初始化完成
+```
+
+或者如果是首次启动：
+```
+🚀 开始初始化数据库...
+📦 开始初始化昆虫品种...
+✅ 已创建: 天门螳螂 (ID: xxx)
+✅ 已创建: 天门甲虫 (ID: xxx)
+...
+✅ 昆虫品种初始化完成
+✅ 数据库初始化完成
+```
+
+### Q2: 如何查看预设的昆虫品种？
+
+启动后端服务后，访问：
+```bash
+curl http://localhost:3000/api/inventory/insects
+```
+
+应该看到预设的 6 种昆虫品种。
+
+### Q3: 小程序导入后显示"暂无库存数据"？
+
+这是正常现象，因为：
+- 预设的昆虫品种库存数量为 0
+- 需要手动添加库存记录或进行进货操作
 
 **解决方法**：
-1. 确认选择的是 `projects/dist/` 文件夹
-2. 确认 `projects/dist/` 文件夹下有 `app.json` 文件
+1. 点击绿色的"新增"按钮
+2. 填写昆虫信息
+3. 设置库存数量
+4. 点击"保存"
 
-### Q2: 如何验证 AppID 是否正确？
+### Q4: 如何查看仓库位置列表？
+
+访问：
+```bash
+curl http://localhost:3000/api/inventory/locations
+```
+
+应该看到预设的 9 个仓库位置。
+
+### Q5: 图片上传失败？
+
+**检查步骤**：
+1. 确认后端服务已启动
+2. 确认 Supabase Storage 已配置
+3. 检查 `insect-images` bucket 是否存在
+4. 查看后端日志中的错误信息
+
+### Q6: 如何测试所有 API 接口？
 
 ```bash
-cat projects/dist/project.config.json | grep appid
-```
+# 获取仓库位置
+curl http://localhost:3000/api/inventory/locations
 
-应该显示：
-```
-"appid": "wx06b72147ad791131"
-```
+# 获取昆虫列表
+curl http://localhost:3000/api/inventory/insects
 
-### Q3: 如何修改代码并热更新？
+# 获取库存列表
+curl http://localhost:3000/api/inventory
 
-```bash
-cd projects
-pnpm install
-coze dev
+# 获取库存汇总
+curl http://localhost:3000/api/inventory/summary
 ```
-
-修改代码后，dist 目录会自动更新，微信开发者工具会自动刷新。
 
 ---
 
-## 🎉 现在可以开始了！
+## 📊 系统架构
+
+### 前端
+- **框架**：Taro 4 + React 18
+- **样式**：Tailwind CSS 4
+- **状态管理**：Zustand
+- **图标库**：lucide-react-taro
+
+### 后端
+- **框架**：NestJS 10
+- **数据库**：PostgreSQL (Supabase)
+- **文件存储**：Supabase Storage
+- **图片处理**：Sharp
+- **跨端兼容**：支持微信小程序 + H5
+
+### 核心功能
+- ✅ 多门店库存管理
+- ✅ 操作记录追踪
+- ✅ 串货功能
+- ✅ 图片上传和裁剪
+- ✅ 数据统计和报表
+- ✅ 数据库自动初始化
+
+---
+
+## 🎯 使用场景
+
+### 场景 1：展会现场库存管理
+1. 展会前：将库存从公司总部转移到展会现场
+2. 展会中：实时记录销售和死亡情况
+3. 展会后：将剩余库存转移回公司总部
+
+### 场景 2：多门店库存同步
+1. 不同团队在不同位置管理库存
+2. 实时查看所有门店的库存情况
+3. 支持门店间串货和调拨
+
+### 场景 3：数据统计和分析
+1. 查看各门店的库存汇总
+2. 分析销售和死亡记录
+3. 统计各昆虫品种的库存状态
+
+---
+
+## 📞 技术支持
+
+如果遇到问题，请：
+1. 查看项目文档（README.md、DEV_SETUP.md、DEPLOYMENT.md）
+2. 检查控制台错误日志
+3. 确认 Node.js 版本 >= 18
+4. 确认 pnpm 版本 >= 9.0.0
+5. 确认后端服务正常运行
+
+---
+
+## 🎉 现在开始使用！
 
 **下载链接（30天有效）：**
 
 ```
-https://coze-coding-project.tos.coze.site/coze_storage_7613471713153613865/projects-backup-v3.tar_700741e0.gz?sign=1775537472-3d8e73daa3-0-a07a52be10386d5c68955debe6ac8a50b46a878009be2c04a43c467b7ffd9209
+https://coze-coding-project.tos.coze.site/coze_storage_7613471713153613865/projects-backup-v4.tar_e6a9fc54.gz?sign=1775537956-4e6dc16d5c-0-bec99f1f8896eaa002e3db0d510739b4359fbea5e8a3d663215abc274de1a980
 ```
 
 **保存到本地：projects-backup.tar.gz** 🚀
 
-**解压后直接导入 projects/dist/ 到微信开发者工具即可！** ✨
+**解压后直接导入 `projects/dist/` 到微信开发者工具即可！** ✨
+
+**启动后端服务后，数据库会自动初始化预设数据！** 🎊

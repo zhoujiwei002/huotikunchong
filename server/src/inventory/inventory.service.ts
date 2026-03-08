@@ -5,6 +5,26 @@ import { getSupabaseClient } from '../storage/database/supabase-client'
 export class InventoryService {
   private client = getSupabaseClient()
 
+  // 预设的仓库位置
+  private readonly LOCATIONS = [
+    '全部',
+    '公司总部',
+    '王东团队',
+    '袁兴彪团队',
+    '郭秀华团队',
+    '王希强团队',
+    '王成兵团队',
+    '周纪良团队',
+    '秦文胜团队',
+    '刘君团队',
+  ]
+
+  // ==================== 系统信息 ====================
+
+  getLocations() {
+    return this.LOCATIONS
+  }
+
   // ==================== 昆虫管理 ====================
 
   async getInsects() {
