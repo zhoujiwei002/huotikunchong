@@ -1,0 +1,16 @@
+# Render.com 部署配置
+services:
+  - type: web
+    name: inventory-system
+    env: node
+    buildCommand: cd server && npm install && npm run build
+    startCommand: cd server && npm run start:prod
+    envVars:
+      - key: NODE_VERSION
+        value: 18
+      - key: PROJECT_DOMAIN
+        value: https://inventory-system.onrender.com
+      - key: COZE_SUPABASE_URL
+        sync: false
+      - key: COZE_SUPABASE_ANON_KEY
+        sync: false
