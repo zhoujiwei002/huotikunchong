@@ -1,15 +1,23 @@
 {
   "version": 2,
+  "name": "inventory-system",
   "builds": [
     {
-      "src": "dist-web/**",
-      "use": "@vercel/static"
+      "src": "dist/server.js",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/dist-web/$1"
+      "dest": "/dist/server.js"
     }
-  ]
+  ],
+  "env": {
+    "PROJECT_DOMAIN": "@project-domain",
+    "COZE_SUPABASE_URL": "@supabase-url",
+    "COZE_SUPABASE_ANON_KEY": "@supabase-anon-key"
+  },
+  "buildCommand": "cd server && npm run build",
+  "outputDirectory": "server/dist"
 }
