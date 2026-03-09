@@ -1,23 +1,12 @@
 {
   "version": 2,
-  "name": "inventory-system",
-  "builds": [
+  "buildCommand": "cd server && npm install && npm run build",
+  "outputDirectory": "server/dist",
+  "framework": null,
+  "rewrites": [
     {
-      "src": "dist/server.js",
-      "use": "@vercel/node"
+      "source": "/(.*)",
+      "destination": "/api/index"
     }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/dist/server.js"
-    }
-  ],
-  "env": {
-    "PROJECT_DOMAIN": "@project-domain",
-    "COZE_SUPABASE_URL": "@supabase-url",
-    "COZE_SUPABASE_ANON_KEY": "@supabase-anon-key"
-  },
-  "buildCommand": "cd server && npm run build",
-  "outputDirectory": "server/dist"
+  ]
 }
