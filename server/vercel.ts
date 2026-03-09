@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from '@/app.module';
+import { AppModule } from './src/app.module';
 import * as express from 'express';
-import { HttpStatusInterceptor } from '@/interceptors/http-status.interceptor';
+import { HttpStatusInterceptor } from './src/interceptors/http-status.interceptor';
 
 let cachedApp: any = null;
 
