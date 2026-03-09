@@ -1,12 +1,5 @@
 {
   "version": 2,
   "buildCommand": "cd server && npm install && npm run build",
-  "outputDirectory": "server",
-  "framework": null,
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/vercel.js"
-    }
-  ]
+  "outputDirectory": "server"
 }

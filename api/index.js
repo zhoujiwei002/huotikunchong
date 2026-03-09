@@ -1,9 +1,9 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './src/app.module';
-import * as express from 'express';
-import { HttpStatusInterceptor } from './src/interceptors/http-status.interceptor';
+const express = require('express');
+const { NestFactory } = require('@nestjs/core');
+const { AppModule } = require('./server/dist/app.module');
+const { HttpStatusInterceptor } = require('./server/dist/interceptors/http-status.interceptor');
 
-let cachedApp: any = null;
+let cachedApp = null;
 
 async function bootstrap() {
   if (cachedApp) {
@@ -28,9 +28,9 @@ async function bootstrap() {
   return app;
 }
 
-export default async function handler(req: any, res: any) {
+module.exports = async function handler(req, res) {
   const app = await bootstrap();
   const expressApp = app.getHttpAdapter().getInstance();
 
   return expressApp(req, res);
-}
+};
